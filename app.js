@@ -742,6 +742,9 @@ function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
   
+  const hint = document.getElementById('audioStatusHint');
+  if (hint) hint.classList.add('hide');
+  
   // Tenta inicializar contextos de áudio
   try {
     window.speechSynthesis.cancel();
