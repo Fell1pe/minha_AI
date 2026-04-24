@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>R.O.B.S.O.N — Assistente Pessoal de IA</title>
+  <meta name="description" content="ROBSON — assistente de IA ativada por voz, respostas em português." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="hud-corner hud-tl" aria-hidden="true"></div>
+  <div class="hud-corner hud-tr" aria-hidden="true"></div>
+  <div class="hud-corner hud-bl" aria-hidden="true"></div>
+  <div class="hud-corner hud-br" aria-hidden="true"></div>
+
+  <!-- Painel esquerdo -->
+  <div class="side-panel left-panel" aria-hidden="true">
+    <div class="panel-line">SYS.STATUS</div>
+    <div class="panel-line accent" id="cpuStatus">OLLAMA: OK</div>
+    <div class="panel-line">MODO</div>
+    <div class="panel-line accent">VOZ.EXCLUSIVO</div>
+    <div class="panel-line">LANG</div>
+    <div class="panel-line accent">PT-BR</div>
+    <div class="panel-line">WAKE.WORD</div>
+    <div class="panel-line accent">ROBSON</div>
+    <div class="panel-line">TTS</div>
+    <div class="panel-line accent" id="voiceInStatus">VERIFICANDO</div>
+  </div>
+
+  <!-- Painel direito -->
+  <div class="side-panel right-panel" aria-hidden="true">
+    <div class="panel-line">PROTOCOLO</div>
+    <div class="panel-line accent">ROBSON.v1</div>
+    <div class="panel-line">DATA</div>
+    <div class="panel-line accent" id="dateDisplay">--/--/----</div>
+    <div class="panel-line">HORA</div>
+    <div class="panel-line accent" id="timeDisplay">--:--:--</div>
+    <div class="panel-line">MODELO</div>
+    <div class="panel-line accent" id="modelDisplay">qwen2.5:1.5b</div>
+    <div class="panel-line">MSGS</div>
+    <div class="panel-line accent" id="msgCount">0</div>
+  </div>
+
+  <main class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="system-badge">ASSISTENTE DE VOZ</div>
+      </div>
+      <h1 class="title">
+        <span class="title-j">R</span>.<span class="title-a">O</span>.<span class="title-r">B</span>.<span class="title-v">S</span>.<span class="title-j">O</span>.<span class="title-a">N</span>
+      </h1>
+      <div class="header-right">
+        <div class="connection-indicator" id="connectionIndicator">
+          <div class="conn-dot"></div>
+          <span class="conn-label" id="connLabel">CONECTANDO</span>
+        </div>
+      </div>
+    </header>
+
+    <div id="audioStatusHint" class="audio-hint">⚠️ Áudio Bloqueado - Clique na Tela para Ativar</div>
+
+    <!-- Arc Reactor -->
+    <section class="reactor-section" aria-label="Visualizador ROBSON">
+      <div class="arc-reactor" id="arcReactor">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="orbit-seg seg1"></div>
+        <div class="orbit-seg seg2"></div>
+        <div class="orbit-seg seg3"></div>
+        <div class="core">
+          <div class="core-glow"></div>
+          <div class="core-center">
+            <div class="waveform" id="waveform">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="thinking-spinner" id="thinkingSpinner"></div>
+            <div class="idle-icon" id="idleIcon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="agent-state-label" id="agentStateLabel">INICIALIZANDO</div>
+
+      <!-- Wake word indicator -->
+      <div class="wake-indicator" id="wakeIndicator">
+        <span class="wake-dot"></span>
+        <span class="wake-text" id="wakeText">Diga <strong>ROBSON</strong> para ativar</span>
+      </div>
+    </section>
+
+    <!-- Chat Oculto (mantido no DOM para lógica interna) -->
+    <section class="chat-section" style="display:none;">
+      <div class="chat-history" id="chatHistory"></div>
+    </section>
+
+    <!-- Controles Ocultos -->
+    <section class="controls-section" style="display:none;">
+      <button id="stopBtn"></button>
+      <button id="clearBtn"></button>
+      <button id="debugBtn"></button>
+      <select id="modelSelect"><option value="qwen2.5:1.5b"></option></select>
+    </section>
+
+      <!-- Pipeline log (oculto por padrão, toggle com botão) -->
+      <div class="pipeline-log" id="pipelineLog" style="display:none;">
+        <div class="pipeline-log-header">⚡ PIPELINE LOG</div>
+        <div class="pipeline-log-body" id="pipelineLogBody"></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>ROBSON · OLLAMA LOCAL · PT-BR · <span id="modelDisplay2">qwen2.5:1.5b</span></span>
+    </footer>
+
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+
+  <script src="app.js"></script>
+</body>
+</html>
